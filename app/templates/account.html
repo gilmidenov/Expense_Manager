@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Expense manager</h2>
+<p>Здравствуй, {{ user.first_name }}! Ваш email: {{ user.email }}(<button class="btn btn-sm p-0 btn-danger"
+                                                              onclick="logout_script()">Выйти</button>)</p>
+
+    <form method="get">
+        <div class="mb-3">
+            <input name="search" type="text" class="form-control" id="search" placeholder="Search..."
+                   value="{{ search }}" autofocus>
+        </div>
+    </form>
+
+
+<nav>
+  <ul class="pagination">
+    <li class="page-item {% if not has_previous %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ previous_page }}&search={{ search }}">Назад</a></li>
+    {% for page in count_of_pages %}
+        <li class="page-item {% if page == current_page %}active{% endif %}"><a class="page-link" href="?page={{ page }}&search={{search}}">{{ page }}</a></li>
+    {% endfor %}
+    <li class="page-item {% if not has_next %}disabled{% endif %}">
+        <a class="page-link" href="?page={{ next_page }}&search={{ search }}">Вперед</a></li>
+  </ul>
+</nav>
+
+    <table class="table table-hover">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Operations</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for transaction in transactions %}
+    <tr>
+        <td>{{ transaction.id }}</td>
+        <td>{{ transaction.modified }}</td>
+        <td>{{ transaction.description }}</td>
+        <td style="color:{% if transaction.amount < 0 %}red{% else %}green{% endif %}">{{ transaction.amount }}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="delete_transaction({{ transaction.id }})">Delete</button>
+            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                    data-bs-target="#modal_edit_{{ transaction.id }}">Edit</button></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <script>
+    const logout_script = () => {
+        const result = confirm("Do you relly want to get out?");
+        if (result) {
+            window.location = '/logout/';
+        }
+
+    }
+    </script>
+
+    <script>
+    const delete_transaction = (transaction_id) => {
+    const result = confirm("Delete transaction №"+ transaction_id +"?");
+        if (result) {
+            const url = '/delete/'+ transaction_id;
+            window.location = url;
+        }
+
+    }
+    </script>
+
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Add an entry
+    </button>
+
+    <a class="btn btn-danger" style="margin-left: 90px" href="/add_10">Add random</a>
+
+
+
+    {% include "create.html" %}
+
+    {% for transaction in transactions %}
+        {% include "edit.html" %}
+    {% endfor %}
+{% endblock %}
